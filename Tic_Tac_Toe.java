@@ -3,9 +3,7 @@ import java.util.Scanner;
 public class Tic_Tac_Toe 
 {
     // Keep track of how many times each player wins and ties
-    public static int playerXWin = 0;
-    public static int playerOWin = 0;
-    public static int tie = 0;
+    public static int playerXWin = 0, playerOWin = 0, tie = 0;
     
     // Keep track of the number of turns taken to check for tie
     public static int counter = 0;
@@ -29,17 +27,17 @@ public class Tic_Tac_Toe
     public static void main(String[] args) 
     {
         // Display the main menu
-        MAIN_MENU();
+    	mainMenu();
         
         // Close the scanner after the entire program has finished executing
         scanner.close();
     }
 
     // Display the main menu
-    public static void MAIN_MENU() 
+    public static void mainMenu() 
     {
         // Display the game's title
-        DISPLAY_TITLE();
+    	displayTitle();
         
         // Prompt the user to choose between tutorial and play
         System.out.print("\nWelcome to Tic Tac Toe!!!\n\nChoose one of the options below: \n - Tutorial\n - Play\n\n");
@@ -53,22 +51,18 @@ public class Tic_Tac_Toe
             System.out.print("\nInvalid choice. Please choose one of the options. ");
             choice = scanner.nextLine().toLowerCase().trim();
         }
-    
+        
+        clearScreen();
+        
         // Call the appropriate method based on user's choice
         if (choice.equals("tutorial")) 
-        {
-            CLEAR_SCREEN();
-            TUTORIAL();
-        } 
+        	tutorial();
         if (choice.equals("play"))
-        {
-        	CLEAR_SCREEN();
-            PLAY_GAME();
-        }
+        	playGame();
     }
 
     // Display the game tutorial
-    public static void TUTORIAL() 
+    public static void tutorial() 
     {
         // Display game rules and board layout
         System.out.println("\nHow to Play Tic Tac Toe:\n");
@@ -77,29 +71,27 @@ public class Tic_Tac_Toe
         System.out.println("- The first player to get three of their symbols in a row, column, or diagonal wins the game.");
         System.out.println("- If all 9 squares are filled without any player achieving three in a row, the game is a tie.");
         System.out.println("\n- Here's the layout of the Tic Tac Toe board:\n");
+        
         // Display the game board layout
-        DISPLAY_BOARD(placeOption);
+        displayBoard(placeOption);
         
         System.out.print("\nPress Enter to return to the main menu. ");
         scanner.nextLine();
-        CLEAR_SCREEN();
-        MAIN_MENU();
+        clearScreen();
+        mainMenu();
     }
 
     // Start the game
-    public static void PLAY_GAME() 
+    public static void playGame() 
     {
-        DISPLAY_BOARD(placeOption); // Display the game board
+    	displayBoard(placeOption); // Display the game board
     
         // Main game loop
         while (!gameEnd) 
         {
-            TAKE_TURN("X"); // Player X's turn
-            
-            if (gameEnd)
-                break;
-            
-            TAKE_TURN("O"); // Player O's turn
+        	takeTurn("X"); // Player X's turn
+            if (gameEnd) break;
+            takeTurn("O"); // Player O's turn
         }
         
         // Prompt the user to play again
@@ -118,27 +110,27 @@ public class Tic_Tac_Toe
         if (choicePlayAgain.startsWith("y")) 
         {
             // Reset game variables
-            RESET_GAME();
-            CLEAR_SCREEN();
-            MAIN_MENU();
+        	resetGame();
+            clearScreen();
+            mainMenu();
         } 
         else 
         {
             // Display game statistics and exit
-            DISPLAY_STATISTICS();
+        	displayStatistics();
             System.out.println("\nHave a great day.");
             System.exit(0);
         }
     }
     
     // Take player's turn
-    public static void TAKE_TURN(String playerSymbol) 
+    public static void takeTurn(String playerSymbol) 
     {
         // Process player's turn
         System.out.println("\nType 'exit' to leave the game early.");
-        PLAYER_TURN(playerSymbol);
+        playerTurn(playerSymbol);
         
-        if (CHECK_FOR_WIN(placeOption, playerSymbol)) 
+        if (checkForWin(placeOption, playerSymbol)) 
         {
             gameEnd = true; // If Player wins
             return;
@@ -149,12 +141,11 @@ public class Tic_Tac_Toe
             System.out.println("\nIt's a tie.");
             tie++;
             gameEnd = true;
-            return;
         }
     }
     
     // Player's turn
-    public static void PLAYER_TURN(String playerChoice)
+    public static void playerTurn(String playerChoice)
     {
         // Prompt the player to choose a position
         do
@@ -165,9 +156,9 @@ public class Tic_Tac_Toe
             // If the input is 'exit', return to the main menu
             if (input.equals("exit")) 
             {
-                CLEAR_SCREEN();
-                RESET_GAME();
-                MAIN_MENU();
+            	clearScreen();
+            	resetGame();
+            	mainMenu();
                 return;
             }
     
@@ -210,35 +201,35 @@ public class Tic_Tac_Toe
         for (int k = 0; k < placeOption.length; k++) 
         {
             if (k == optionPlace) 
-            {
                 placeOption[k] = playerChoice;
-            }
         }
             
-        DISPLAY_BOARD(placeOption);
+        displayBoard(placeOption);
         counter++;
     }
 
-    
     // Checks for a win by checking all possibilities
-    public static boolean CHECK_FOR_WIN(String[] placeOption, String typePlayer)
+    public static boolean checkForWin(String[] placeOption, String typePlayer)
     {
-        // Define winning combinations
+        // Define winning combinations (horizontal, vertical and diagonal)
         if ((placeOption[0].equals(typePlayer) && placeOption[1].equals(typePlayer) && placeOption[2].equals(typePlayer)) || (placeOption[3].equals(typePlayer) && placeOption[4].equals(typePlayer) && placeOption[5].equals(typePlayer)) || (placeOption[6].equals(typePlayer) && placeOption[7].equals(typePlayer) && placeOption[8].equals(typePlayer)) || (placeOption[0].equals(typePlayer) && placeOption[3].equals(typePlayer) && placeOption[6].equals(typePlayer)) || (placeOption[1].equals(typePlayer) && placeOption[4].equals(typePlayer) && placeOption[7].equals(typePlayer)) || (placeOption[2].equals(typePlayer) && placeOption[5].equals(typePlayer) && placeOption[8].equals(typePlayer)) || (placeOption[0].equals(typePlayer) && placeOption[4].equals(typePlayer) && placeOption[8].equals(typePlayer)) || (placeOption[2].equals(typePlayer) && placeOption[4].equals(typePlayer) && placeOption[6].equals(typePlayer)))
         {
             // Display the winner
             System.out.println("\nPlayer " + typePlayer + " wins!!!");
+            
             if (typePlayer.equals("X"))
                 playerXWin++;
             else
                 playerOWin++;
+            
             return true; 
         }
+        
         return false; 
     }
     
     // Reset game variables
-    public static void RESET_GAME() 
+    public static void resetGame() 
     {
         // Reset game variables for a new game
         gameEnd = false;
@@ -249,21 +240,21 @@ public class Tic_Tac_Toe
     }
     
     // Clear the console screen
-    public static void CLEAR_SCREEN() 
+    public static void clearScreen() 
     {
         for (int i = 0; i < 50; i++)
             System.out.println();
     }
     
     // Display game statistics
-    public static void DISPLAY_STATISTICS() 
+    public static void displayStatistics() 
     {
         // Display player win counts and tie counts
         System.out.println("\nPlayer X win count: " + playerXWin + "\nPlayer O win count: " + playerOWin + "\nTie game count: " + tie);
     }
     
     // Display the game's title
-    public static void DISPLAY_TITLE() 
+    public static void displayTitle() 
     {
         // Title ASCII art
         System.out.println("\t::::::::::: :::::::::::   ::::::::       :::::::::::     :::       ::::::::       :::::::::::  ::::::::   ::::::::::");
@@ -276,9 +267,8 @@ public class Tic_Tac_Toe
     }
     
     // Display the game board
-    public static void DISPLAY_BOARD(String[] placeOption)
+    public static void displayBoard(String[] placeOption)
     {
-        // Display the current game board
         System.out.println("\n        *         *        \n   " + placeOption[0] + "    *    " + placeOption[1] + "    *    " + placeOption[2] + "   \n        *         *        \n***************************\n        *         *        \n   " + placeOption[3] + "    *    " + placeOption[4] + "    *    " + placeOption[5] + "   \n        *         *        \n***************************\n        *         *        \n   " + placeOption[6] + "    *    " + placeOption[7] + "    *    " + placeOption[8] + "   \n        *         *        ");
     }
 }
