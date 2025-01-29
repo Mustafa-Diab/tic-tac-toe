@@ -31,8 +31,15 @@ This version of Tic-Tac-Toe is implemented in Java and runs in the console.
 
 ## Getting Started  
 
+## 🚀 Getting Started  
+
+### Prerequisites  
+- Java Development Kit (JDK) 11 or higher.  
+- A Java IDE (e.g., IntelliJ IDEA, Eclipse, or VS Code).  
+
 ### Installation  
 
 1. Clone the repository:  
    ```bash  
-   git clone https://github.com/Mustafa-Diab/tic-tac-toe.git
+   git clone https://github.com/Mustafa-Diab/super-tic-tac-toe.git
+   
