@@ -28,3 +28,11 @@ This version of Tic-Tac-Toe is implemented in Java and runs in the console.
    4 | 5 | 6  
    ---------  
    7 | 8 | 9  
+
+## Getting Started  
+
+### Installation  
+
+1. Clone the repository:  
+   ```bash  
+   git clone https://github.com/Mustafa-Diab/tic-tac-toe.git
