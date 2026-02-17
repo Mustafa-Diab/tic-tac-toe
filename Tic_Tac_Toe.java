@@ -1,274 +1,224 @@
-import java.util.Scanner;
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import javax.swing.*;
 
-public class Tic_Tac_Toe 
+public class Tic_Tac_Toe extends JFrame implements MouseListener 
 {
-    // Keep track of how many times each player wins and ties
-    public static int playerXWin = 0, playerOWin = 0, tie = 0;
-    
-    // Keep track of the number of turns taken to check for tie
-    public static int counter = 0;
-    
-    // Store the index of the chosen position
-    public static int optionPlace = 0;
-    
-    // Keep track of numbers already guessed to avoid repetition
-    public static String numGuessAlready = "";
-    
-    // Store the available options to place 'X's and 'O's
-    public static String[] placeOption = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
-    
-    // Initiates the scanner for the entire game
-    public static Scanner scanner = new Scanner(System.in);
-    
-    // Keep track of whether the game has ended or not
-    public static boolean gameEnd = false;
+    private static final long serialVersionUID = 1L;
 
-    // Main method to start the program
-    public static void main(String[] args) 
+    // Game State Variables 
+    private String[] board = new String[9];  // Stores "X", "O", or "" for each cell
+    private boolean xTurn = true;            // True if it's X's turn, false if O's turn
+    private boolean gameEnd = false;         // True if the game has ended
+
+    // Score Counters 
+    private int playerXWin = 0;              // Count of wins for player X
+    private int playerOWin = 0;              // Count of wins for player O
+    private int tie = 0;                     // Count of tie games
+    private int counter = 0;                 // Number of moves made in current game
+
+    // GUI Variables 
+    private JPanel mainPanel;                // Main panel for drawing the game
+    private final int CELL_SIZE = 200;       // Width and height of each Tic Tac Toe cell
+    private final int BOARD_TOP = 150;       // Vertical offset for top of board
+
+    // Main Method 
+    public static void main(String[] args) {new Tic_Tac_Toe();}
+
+    // Constructor 
+    public Tic_Tac_Toe() 
     {
-        // Display the main menu
-    	mainMenu();
-        
-        // Close the scanner after the entire program has finished executing
-        scanner.close();
+        setTitle("Tic Tac Toe");
+        setSize(800, 900);                     // Set window size
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);           // Center window on screen
+
+        // Initialize board with empty strings
+        for (int i = 0; i < board.length; i++) board[i] = "";
+
+        // Create custom panel for drawing
+        mainPanel = new JPanel() 
+        {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            protected void paintComponent(Graphics g) 
+            {
+                super.paintComponent(g);
+                drawTitle(g);     // Draw game title
+                drawBoard(g);     // Draw Tic Tac Toe grid
+                drawMarks(g);     // Draw X and O marks
+                drawScoreboard(g);// Draw current scores
+            }
+        };
+
+        mainPanel.setBackground(Color.BLACK);  // Set background color
+        mainPanel.addMouseListener(this);      // Add mouse listener to detect clicks
+        add(mainPanel);                        // Add panel to frame
+        setVisible(true);                      // Show window
     }
 
-    // Display the main menu
-    public static void mainMenu() 
+    // Draw Title
+    private void drawTitle(Graphics g) 
     {
-        // Display the game's title
-    	displayTitle();
+        g.setFont(new Font("Arial", Font.BOLD, 40));
+        g.setColor(Color.WHITE);
+        String title = "Tic Tac Toe";
+
+        // Center title horizontally
+        int x = (getWidth() - g.getFontMetrics().stringWidth(title)) / 2;
+        g.drawString(title, x, 50);
         
-        // Prompt the user to choose between tutorial and play
-        System.out.print("\nWelcome to Tic Tac Toe!!!\n\nChoose one of the options below: \n - Tutorial\n - Play\n\n");
-    
-        // Read the user's choice
-        String choice = scanner.nextLine().toLowerCase().trim();
-    
-        // Validate user input
-        while (!(choice.equals("tutorial") || choice.equals("play") || choice.equals("0")))
-        {
-            System.out.print("\nInvalid choice. Please choose one of the options. ");
-            choice = scanner.nextLine().toLowerCase().trim();
-        }
-        
-        clearScreen();
-        
-        // Call the appropriate method based on user's choice
-        if (choice.equals("tutorial")) 
-        	tutorial();
-        if (choice.equals("play"))
-        	playGame();
+        // Draw a mini subtitle for current turn
+        g.setFont(new Font("Arial", Font.BOLD, 20));
+        String turnText = xTurn ? "Player X's Turn" : "Player O's Turn";
+        int turnX = (getWidth() - g.getFontMetrics().stringWidth(turnText)) / 2;
+        g.drawString(turnText, turnX, 90);  // Draw it just below the title
     }
 
-    // Display the game tutorial
-    public static void tutorial() 
+    // Draw Tic Tac Toe Grid 
+    private void drawBoard(Graphics g) 
     {
-        // Display game rules and board layout
-        System.out.println("\nHow to Play Tic Tac Toe:\n");
-        System.out.println("- Tic Tac Toe is a two-player game played on a 3x3 grid.");
-        System.out.println("- Players take turns placing their symbol ('X' or 'O') in an empty square on the grid.");
-        System.out.println("- The first player to get three of their symbols in a row, column, or diagonal wins the game.");
-        System.out.println("- If all 9 squares are filled without any player achieving three in a row, the game is a tie.");
-        System.out.println("\n- Here's the layout of the Tic Tac Toe board:\n");
-        
-        // Display the game board layout
-        displayBoard(placeOption);
-        
-        System.out.print("\nPress Enter to return to the main menu. ");
-        scanner.nextLine();
-        clearScreen();
-        mainMenu();
+        g.setColor(Color.WHITE);
+
+        // Calculate horizontal offset to center the grid
+        int offsetX = (getWidth() - 3 * CELL_SIZE) / 2;
+
+        // Draw vertical lines
+        g.drawLine(offsetX + CELL_SIZE, BOARD_TOP, offsetX + CELL_SIZE, BOARD_TOP + 3 * CELL_SIZE);
+        g.drawLine(offsetX + 2 * CELL_SIZE, BOARD_TOP, offsetX + 2 * CELL_SIZE, BOARD_TOP + 3 * CELL_SIZE);
+
+        // Draw horizontal lines
+        g.drawLine(offsetX, BOARD_TOP + CELL_SIZE, offsetX + 3 * CELL_SIZE, BOARD_TOP + CELL_SIZE);
+        g.drawLine(offsetX, BOARD_TOP + 2 * CELL_SIZE, offsetX + 3 * CELL_SIZE, BOARD_TOP + 2 * CELL_SIZE);
     }
 
-    // Start the game
-    public static void playGame() 
+    // Draw X and O Marks
+    private void drawMarks(Graphics g) 
     {
-    	displayBoard(placeOption); // Display the game board
-    
-        // Main game loop
-        while (!gameEnd) 
+        g.setFont(new Font("Arial", Font.BOLD, 100));  // Set font size for X and O
+        FontMetrics metrics = g.getFontMetrics();
+        int offsetX = (getWidth() - 3 * CELL_SIZE) / 2; // Horizontal centering
+
+        for (int i = 0; i < board.length; i++) 
         {
-        	takeTurn("X"); // Player X's turn
-            if (gameEnd) break;
-            takeTurn("O"); // Player O's turn
-        }
-        
-        // Prompt the user to play again
-        System.out.print("\nWould you like to play again? (yes/no) ");
-        String choicePlayAgain = scanner.nextLine().toLowerCase().trim();
-         
-        // Validate User Input
-        while (!(choicePlayAgain.startsWith("y") || choicePlayAgain.startsWith("n")))
-        {
-            // Prompt the user to play again
-            System.out.print("\nInvalid input. Please enter yes or no. ");
-            choicePlayAgain = scanner.nextLine().toLowerCase().trim();
-        }
-        
-        // Handle the user's choice
-        if (choicePlayAgain.startsWith("y")) 
-        {
-            // Reset game variables
-        	resetGame();
-            clearScreen();
-            mainMenu();
-        } 
-        else 
-        {
-            // Display game statistics and exit
-        	displayStatistics();
-            System.out.println("\nHave a great day.");
-            System.exit(0);
+            String mark = board[i];
+
+            // Only draw non-empty cells
+            if (!mark.equals("")) 
+            {
+                int row = i / 3;
+                int col = i % 3;
+
+                // Center the mark within the cell
+                int x = offsetX + col * CELL_SIZE + (CELL_SIZE - metrics.stringWidth(mark)) / 2;
+                int y = BOARD_TOP + row * CELL_SIZE + (CELL_SIZE + metrics.getAscent()) / 2 - 10;
+
+                // Use red for X, blue for O
+                g.setColor(mark.equals("X") ? Color.RED : Color.BLUE);
+                g.drawString(mark, x, y);
+            }
         }
     }
-    
-    // Take player's turn
-    public static void takeTurn(String playerSymbol) 
+
+    // Draw Scoreboard 
+    private void drawScoreboard(Graphics g) 
     {
-        // Process player's turn
-        System.out.println("\nType 'exit' to leave the game early.");
-        playerTurn(playerSymbol);
-        
-        if (checkForWin(placeOption, playerSymbol)) 
+        g.setFont(new Font("Arial", Font.BOLD, 28));
+        g.setColor(Color.WHITE);
+
+        String scoreText = "Player X Wins: " + playerXWin + "   |   Player O Wins: " + playerOWin + "   |   Ties: " + tie;
+
+        // Center scoreboard horizontally
+        int x = (getWidth() - g.getFontMetrics().stringWidth(scoreText)) / 2;
+        g.drawString(scoreText, x, BOARD_TOP + 3 * CELL_SIZE + 50);
+    }
+
+    // Handle Mouse Clicks 
+    public void mouseClicked(MouseEvent e) 
+    {
+        if (gameEnd) return; // Ignore clicks if game ended
+
+        // Calculate horizontal offset for centering
+        int offsetX = (getWidth() - 3 * CELL_SIZE) / 2;
+
+        // Convert mouse coordinates to row and column
+        int col = (e.getX() - offsetX) / CELL_SIZE;
+        int row = (e.getY() - BOARD_TOP) / CELL_SIZE;
+        int index = row * 3 + col;
+
+        // If clicked inside a valid empty cell, place mark
+        if (col >= 0 && col < 3 && row >= 0 && row < 3 && board[index].equals("")) 
         {
-            gameEnd = true; // If Player wins
-            return;
+            board[index] = xTurn ? "X" : "O";
+            counter++;
+            xTurn = !xTurn;
+            mainPanel.repaint();   // Redraw board
+            checkGameOver();       // Check for win or tie
         }
-    
-        if (counter == 9) // 9 rounds without anyone winning
+    }
+
+    // Check for Win or Tie 
+    private void checkGameOver() 
+    {
+        String winner = null;
+
+        // Check rows for a win
+        for (int i = 0; i < 9; i += 3)
+            if (!board[i].equals("") && board[i].equals(board[i + 1]) && board[i].equals(board[i + 2]))
+                winner = board[i];
+
+        // Check columns for a win
+        for (int i = 0; i < 3; i++)
+            if (!board[i].equals("") && board[i].equals(board[i + 3]) && board[i].equals(board[i + 6]))
+                winner = board[i];
+
+        // Check diagonals for a win
+        if (!board[0].equals("") && board[0].equals(board[4]) && board[0].equals(board[8]))
+            winner = board[0];
+        if (!board[2].equals("") && board[2].equals(board[4]) && board[2].equals(board[6]))
+            winner = board[2];
+
+        // If a winner is found
+        if (winner != null) 
         {
-            System.out.println("\nIt's a tie.");
-            tie++;
             gameEnd = true;
-        }
-    }
-    
-    // Player's turn
-    public static void playerTurn(String playerChoice)
-    {
-        // Prompt the player to choose a position
-        do
-        {
-            System.out.print("\nPlayer " + playerChoice + ": Select a number between 1-9 to place your option, or type 'exit' to leave the game: ");
-            String input = scanner.nextLine().toLowerCase().trim();
-    
-            // If the input is 'exit', return to the main menu
-            if (input.equals("exit")) 
-            {
-            	clearScreen();
-            	resetGame();
-            	mainMenu();
-                return;
-            }
-    
-            // Check if the input is an integer
-            try 
-            {
-                optionPlace = Integer.parseInt(input);
-            } 
-            catch (NumberFormatException e) 
-            {
-                // If not, display an error message and continue the loop
-                System.out.println("Invalid input! Please choose a number between 1 and 9 or type 'exit' to leave the game.");
-                continue;
-            }
-            
-            // Validate the chosen position
-            if (optionPlace < 1 || optionPlace > 9)
-            {
-                System.out.println("Invalid input! Please choose a number between 1 and 9 or type 'exit' to leave the game.");
-                continue;
-            }
-            
-            // Confirming that the number was not chosen before 
-            if (numGuessAlready.contains(Integer.toString(optionPlace))) 
-            {
-                System.out.println("This number has already been chosen. Please choose a different number.");
-                continue;
-            }
-            
-            // If all checks pass, break out of the loop
-            break;
+
+            // Update score
+            if (winner.equals("X")) playerXWin++;
+            else playerOWin++;
+
+            // Show dialog with "Play Again" button
+            int choice = JOptionPane.showOptionDialog(this, "Player " + winner + " wins!", "Game Over", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[]{"Play Again"}, "Play Again");
+
+            if (choice == 0) restartGame();
         } 
-        while (true);
-    
-        // Record the chosen position
-        numGuessAlready += Integer.toString(optionPlace);
-        optionPlace--;
-    
-        // Update the game board
-        for (int k = 0; k < placeOption.length; k++) 
+        // If all cells filled and no winner => tie
+        else if (counter == 9) 
         {
-            if (k == optionPlace) 
-                placeOption[k] = playerChoice;
+            gameEnd = true;
+            tie++;
+
+            int choice = JOptionPane.showOptionDialog(this, "It's a tie!", "Game Over", JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, new String[]{"Play Again"}, "Play Again");
+
+            if (choice == 0) restartGame();
         }
-            
-        displayBoard(placeOption);
-        counter++;
     }
 
-    // Checks for a win by checking all possibilities
-    public static boolean checkForWin(String[] placeOption, String typePlayer)
+    // Restart the Game
+    private void restartGame() 
     {
-        // Define winning combinations (horizontal, vertical and diagonal)
-        if ((placeOption[0].equals(typePlayer) && placeOption[1].equals(typePlayer) && placeOption[2].equals(typePlayer)) || (placeOption[3].equals(typePlayer) && placeOption[4].equals(typePlayer) && placeOption[5].equals(typePlayer)) || (placeOption[6].equals(typePlayer) && placeOption[7].equals(typePlayer) && placeOption[8].equals(typePlayer)) || (placeOption[0].equals(typePlayer) && placeOption[3].equals(typePlayer) && placeOption[6].equals(typePlayer)) || (placeOption[1].equals(typePlayer) && placeOption[4].equals(typePlayer) && placeOption[7].equals(typePlayer)) || (placeOption[2].equals(typePlayer) && placeOption[5].equals(typePlayer) && placeOption[8].equals(typePlayer)) || (placeOption[0].equals(typePlayer) && placeOption[4].equals(typePlayer) && placeOption[8].equals(typePlayer)) || (placeOption[2].equals(typePlayer) && placeOption[4].equals(typePlayer) && placeOption[6].equals(typePlayer)))
-        {
-            // Display the winner
-            System.out.println("\nPlayer " + typePlayer + " wins!!!");
-            
-            if (typePlayer.equals("X"))
-                playerXWin++;
-            else
-                playerOWin++;
-            
-            return true; 
-        }
-        
-        return false; 
+        for (int i = 0; i < board.length; i++) board[i] = ""; // Clear board
+        gameEnd = false;     								  // Reset gameEnd flag
+        xTurn = true;        								  // X starts
+        counter = 0;         								  // Reset move counter
+        mainPanel.repaint(); 								  // Redraw empty board
     }
-    
-    // Reset game variables
-    public static void resetGame() 
-    {
-        // Reset game variables for a new game
-        gameEnd = false;
-        counter = 0;
-        optionPlace = 0;
-        numGuessAlready = "";
-        placeOption = new String[]{"1", "2", "3", "4", "5", "6", "7", "8", "9"};
-    }
-    
-    // Clear the console screen
-    public static void clearScreen() 
-    {
-        for (int i = 0; i < 50; i++)
-            System.out.println();
-    }
-    
-    // Display game statistics
-    public static void displayStatistics() 
-    {
-        // Display player win counts and tie counts
-        System.out.println("\nPlayer X win count: " + playerXWin + "\nPlayer O win count: " + playerOWin + "\nTie game count: " + tie);
-    }
-    
-    // Display the game's title
-    public static void displayTitle() 
-    {
-        // Title ASCII art
-        System.out.println("\t::::::::::: :::::::::::   ::::::::       :::::::::::     :::       ::::::::       :::::::::::  ::::::::   ::::::::::");
-        System.out.println("\t    :+:         :+:      :+:    :+:          :+:       :+: :+:    :+:    :+:          :+:     :+:    :+:  :+:       ");
-        System.out.println("\t    +:+         +:+      +:+                 +:+      +:+   +:+   +:+                 +:+     +:+    +:+  +:+       ");
-        System.out.println("\t    +#+         +#+      +#+                 +#+     +#++:++#++:  +#+                 +#+     +#+    +:+  +#++:++#  ");
-        System.out.println("\t    +#+         +#+      +#+                 +#+     +#+     +#+  +#+                 +#+     +#+    +#+  +#+       ");
-        System.out.println("\t    #+#         #+#      #+#    #+#          #+#     #+#     #+#  #+#    #+#          #+#     #+#    #+#  #+#       ");
-        System.out.println("\t    ###     ###########   ########           ###     ###     ###   ########           ###      ########   ##########");
-    }
-    
-    // Display the game board
-    public static void displayBoard(String[] placeOption)
-    {
-        System.out.println("\n        *         *        \n   " + placeOption[0] + "    *    " + placeOption[1] + "    *    " + placeOption[2] + "   \n        *         *        \n***************************\n        *         *        \n   " + placeOption[3] + "    *    " + placeOption[4] + "    *    " + placeOption[5] + "   \n        *         *        \n***************************\n        *         *        \n   " + placeOption[6] + "    *    " + placeOption[7] + "    *    " + placeOption[8] + "   \n        *         *        ");
-    }
+
+    // Unused MouseListener Methods 
+    public void mousePressed(MouseEvent e) {}
+    public void mouseReleased(MouseEvent e) {}
+    public void mouseEntered(MouseEvent e) {}
+    public void mouseExited(MouseEvent e) {}
 }
